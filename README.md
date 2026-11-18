@@ -7,7 +7,7 @@ Benchmarks comparing the RGW Lua `RGW` table on `main` with two candidate implem
 | | tree | RGW table |
 |---|---|---|
 | **baseline** | `~/code/ceph` (`main` + a Prometheus metrics commit) | `std::unordered_map` + one global `std::mutex`; `pairs()` iterates without a lock |
-| **candidate: `concurrent_hash_map`** | `~/code/ceph-tbb` (`wip-lua-tbb-chm`, uncommitted iterator change on `5c0d8ff`) | one unsharded `tbb::concurrent_hash_map` behind one Ceph `RWLock` (shared for reads and writes, exclusive for iteration); TBB accessors lock each element; stateless `pairs()` that scans the whole map for the smallest key after the previous one |
+| **candidate: `concurrent_hash_map`** | `~/code/ceph-tbb` (`wip-lua-tbb-chm`) | one unsharded `tbb::concurrent_hash_map` behind one Ceph `RWLock` (shared for reads and writes, exclusive for iteration); TBB accessors lock each element; stateless `pairs()` that scans the whole map for the smallest key after the previous one |
 | **candidate: sharded `std::map`** | `~/code/ceph-lua-sharded-map` (`wip-lua-sharded-map`) | 256 shards, each a plain `std::map` (not a TBB container) guarded by a `tbb::spin_rw_mutex`, plus a `tbb::spin_mutex` on each entry; stateless `pairs()`. TBB is used only for the locks |
 
 ## Run of 2026-11-18, 00:40–01:05: `tbb::concurrent_hash_map` candidate
